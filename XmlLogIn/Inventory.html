@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Inventory</title>
+  <style>
+    .design{
+position: relative;
+bottom: 515px;
+left: 1000px;
+    }
+  </style>
+</head>
+<body>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Product ID</th>
+                <th>Product Name</th>
+                <th>Stuct keeping Unit</th>
+                <th>Manufacturer</th>
+                <th>Category</th>
+                <th>Unit Price</th>
+                <th>Quantity in Stock</th>
+                <th>Reorder's Point</th>
+                <th>Supplier</th>
+                <th>Date Recieved</th>
+                <th>Shelf Location</th>
+                <th>Product Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="productsTable"></tbody>
+    </table>
+    <div class="product-form">
+        <h2>Add Product</h2>
+        <form id="addProductForm">
+            <label for="productName">Product Name:</label>
+            <input type="text" id="productName" required><br><br>
+    
+            <label for="sku">Struct Keeping Unit:</label>
+            <input type="text" id="sku" required><br><br>
+    
+            <label for="manufacturer">Manufacturer:</label>
+            <input type="text" id="manufacturer" required><br><br>
+    
+            <label for="category">Category:</label>
+            <input type="text" id="category" required><br><br>
+    
+            <label for="unitPrice">Unit Price:</label>
+            <input type="text" id="unitPrice" required><br><br>
+    
+            <label for="quantityInStock">Quantity in Stock:</label>
+            <input type="text" id="quantityInStock" required><br><br>
+    
+            <label for="reorderPoint">Reorder Point:</label>
+            <input type="text" id="reorderPoint" required><br><br>
+    
+            <label for="supplier">Supplier:</label>
+            <input type="text" id="supplier" required><br><br>
+    
+            <label for="dateReceived">Date Received:</label>
+            <input type="text" id="dateReceived" required><br><br>
+    
+            <label for="shelfLocation">Shelf Location:</label>
+            <input type="text" id="shelfLocation" required><br><br>
+    
+            <label for="productStatus">Product Status:</label>
+            <input type="text" id="productStatus" required><br><br>
+    
+            <button type="button" onclick="addProduct()">Add Product</button>
+        </form>
+    </div>
+    
+    <div class="product-form design" id="editForm" style="display: none;">
+        <h2>Edit Product</h2>
+        <form id="updateProductForm">
+            <label for="updateProductName">Product Name:</label>
+            <input type="text" id="updateProductName" required><br><br>
+    
+            <label for="updateSKU">Struct Keeping Unit:</label>
+            <input type="text" id="updateSKU" required><br><br>
+    
+            <label for="updateManufacturer">Manufacturer:</label>
+            <input type="text" id="updateManufacturer" required><br><br>
+    
+            <label for="updateCategory">Category:</label>
+            <input type="text" id="updateCategory" required><br><br>
+    
+            <label for="updateUnitPrice">Unit Price:</label>
+            <input type="text" id="updateUnitPrice" required><br><br>
+    
+            <label for="updateQuantityInStock">Quantity in Stock:</label>
+            <input type="text" id="updateQuantityInStock" required><br><br>
+    
+            <label for="updateReorderPoint">Reorder Point:</label>
+            <input type="text" id="updateReorderPoint" required><br><br>
+    
+            <label for="updateSupplier">Supplier:</label>
+            <input type="text" id="updateSupplier" required><br><br>
+    
+            <label for="updateDateReceived">Date Received:</label>
+            <input type="text" id="updateDateReceived" required><br><br>
+    
+            <label for="updateShelfLocation">Shelf Location:</label>
+            <input type="text" id="updateShelfLocation" required><br><br>
+    
+            <label for="updateProductStatus">Product Status:</label>
+            <input type="text" id="updateProductStatus" required><br><br>
+    
+            <button type="button" onclick="updateProduct()">Update Product</button>
+        </form>
+    </div>
+    
+    
+    <button id="logoutButton">Log Out</button>
+    <script>
+        const logoutButton = document.getElementById("logoutButton");
+        let xmlContent = '';
+        let tableproducts = document.getElementById('productsTable');
+        let template = '';
+
+        fetch('PII.xml')
+            .then((response) => {
+                response.text().then((xml) => {
+                    xmlContent = xml;
+                    let parser = new DOMParser();
+                    let xmlDOM = parser.parseFromString(xmlContent, 'application/xml');
+                    let products1 = xmlDOM.querySelectorAll('product');
+                    for (let i = 0; i < products1.length; i++) {
+                        template += `
+                            <tr>
+                                <td>${i + 1}</td>
+                                <td>${products1[i].children[0].textContent}</td>
+                                <td>${products1[i].children[1].textContent}</td>
+                                <td>${products1[i].children[2].textContent}</td>
+                                <td>${products1[i].children[3].textContent}</td>
+                                <td>${products1[i].children[4].textContent}</td>
+                                <td>${products1[i].children[5].textContent}</td>
+                                <td>${products1[i].children[6].textContent}</td>
+                                <td>${products1[i].children[7].textContent}</td>
+                                <td>${products1[i].children[8].textContent}</td>
+                                <td>${products1[i].children[9].textContent}</td>
+                                <td>${products1[i].children[10].textContent}</td>
+                                <td>
+                <button onclick="editProduct(${i + 1})">Edit</button>
+                <button onclick="deleteProduct(${i + 1})">Delete</button>
+            </td>
+                            </tr>
+                        `;
+                    }
+                    tableproducts.innerHTML = template;
+                });
+            });
+
+        logoutButton.addEventListener("click", function () {
+            sessionStorage.clear();
+            window.location.href = "login/index.html";
+        });
+
+        function addProduct() {
+    const productName = document.getElementById("productName").value;
+    const sku = document.getElementById("sku").value;
+    const manufacturer = document.getElementById("manufacturer").value;
+    const category = document.getElementById("category").value;
+    const unitPrice = document.getElementById("unitPrice").value;
+    const quantityInStock = document.getElementById("quantityInStock").value;
+    const reorderPoint = document.getElementById("reorderPoint").value;
+    const supplier = document.getElementById("supplier").value;
+    const dateReceived = document.getElementById("dateReceived").value;
+    const shelfLocation = document.getElementById("shelfLocation").value;
+    const productStatus = document.getElementById("productStatus").value;
+
+    const productElement = document.createElement("product");
+
+    const productAttributes = [
+        "productName",
+        "sku",
+        "manufacturer",
+        "category",
+        "unitprice",
+        "quantityInStock",
+        "reorderPoint",
+        "supplier",
+        "dateRecieved",
+        "shelfLocation",
+        "productStatus",
+    ];
+
+    const attributeValues = [
+        productName,
+        sku,
+        manufacturer,
+        category,
+        unitPrice,
+        quantityInStock,
+        reorderPoint,
+        supplier,
+        dateReceived,
+        shelfLocation,
+        productStatus,
+    ];
+
+    for (let i = 0; i < productAttributes.length; i++) {
+        const childElement = document.createElement(productAttributes[i]);
+        childElement.textContent = attributeValues[i];
+        productElement.appendChild(childElement);
+    }
+
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlContent, "application/xml");
+    xmlDoc.querySelector("catalog").appendChild(productElement);
+
+    xmlContent = new XMLSerializer().serializeToString(xmlDoc);
+
+    // Update the displayed table
+    tableproducts.innerHTML += `
+        <tr>
+            <td>${tableproducts.rows.length}</td>
+            <td>${productName}</td>
+            <td>${sku}</td>
+            <td>${manufacturer}</td>
+            <td>${category}</td>
+            <td>${unitPrice}</td>
+            <td>${quantityInStock}</td>
+            <td>${reorderPoint}</td>
+            <td>${supplier}</td>
+            <td>${dateReceived}</td>
+            <td>${shelfLocation}</td>
+            <td>${productStatus}</td>
+            <td>
+                <button onclick="editProduct(${tableproducts.rows.length})">Edit</button>
+                <button onclick="deleteProduct(${tableproducts.rows.length})">Delete</button>
+            </td>
+        </tr>
+    `;
+
+    // Clear input fields after adding a product
+    document.getElementById("productName").value = "";
+    document.getElementById("sku").value = "";
+    document.getElementById("manufacturer").value = "";
+    document.getElementById("category").value = "";
+    document.getElementById("unitPrice").value = "";
+    document.getElementById("quantityInStock").value = "";
+    document.getElementById("reorderPoint").value = "";
+    document.getElementById("supplier").value = "";
+    document.getElementById("dateReceived").value = "";
+    document.getElementById("shelfLocation").value = "";
+    document.getElementById("productStatus").value = "";
+}
+
+function editProduct(index) {
+    // Set the selected row index
+    selectedRowIndex = index; // Adjust index
+
+    // Set the values of the update form based on the selected row
+    document.getElementById("updateProductName").value = tableproducts.rows[selectedRowIndex].cells[1].textContent;
+    document.getElementById("updateSKU").value = tableproducts.rows[selectedRowIndex].cells[2].textContent;
+    document.getElementById("updateManufacturer").value = tableproducts.rows[selectedRowIndex].cells[3].textContent;
+    document.getElementById("updateCategory").value = tableproducts.rows[selectedRowIndex].cells[4].textContent;
+    document.getElementById("updateUnitPrice").value = tableproducts.rows[selectedRowIndex].cells[5].textContent;
+    document.getElementById("updateQuantityInStock").value = tableproducts.rows[selectedRowIndex].cells[6].textContent;
+    document.getElementById("updateReorderPoint").value = tableproducts.rows[selectedRowIndex].cells[7].textContent;
+    document.getElementById("updateSupplier").value = tableproducts.rows[selectedRowIndex].cells[8].textContent;
+    document.getElementById("updateDateReceived").value = tableproducts.rows[selectedRowIndex].cells[9].textContent;
+    document.getElementById("updateShelfLocation").value = tableproducts.rows[selectedRowIndex].cells[10].textContent;
+    document.getElementById("updateProductStatus").value = tableproducts.rows[selectedRowIndex].cells[11].textContent;
+
+    // Display the update form
+    document.getElementById("editForm").style.display = "block";
+}
+
+
+function updateProduct() {
+    // Retrieve the updated values from the update form
+    const updatedProductName = document.getElementById("updateProductName").value;
+    const updatedSKU = document.getElementById("updateSKU").value;
+    const updatedManufacturer = document.getElementById("updateManufacturer").value;
+    const updatedCategory = document.getElementById("updateCategory").value;
+    const updatedUnitPrice = document.getElementById("updateUnitPrice").value;
+    const updatedQuantityInStock = document.getElementById("updateQuantityInStock").value;
+    const updatedReorderPoint = document.getElementById("updateReorderPoint").value;
+    const updatedSupplier = document.getElementById("updateSupplier").value;
+    const updatedDateReceived = document.getElementById("updateDateReceived").value;
+    const updatedShelfLocation = document.getElementById("updateShelfLocation").value;
+    const updatedProductStatus = document.getElementById("updateProductStatus").value;
+
+    // Update the XML content
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlContent, "application/xml");
+    const productElements = xmlDoc.querySelectorAll('product');
+
+    if (selectedRowIndex >= 0 && selectedRowIndex < productElements.length) {
+        // Update the XML data
+        productElements[selectedRowIndex].children[0].textContent = updatedProductName;
+        productElements[selectedRowIndex].children[1].textContent = updatedSKU;
+        productElements[selectedRowIndex].children[2].textContent = updatedManufacturer;
+        productElements[selectedRowIndex].children[3].textContent = updatedCategory;
+        productElements[selectedRowIndex].children[4].textContent = updatedUnitPrice;
+        productElements[selectedRowIndex].children[5].textContent = updatedQuantityInStock;
+        productElements[selectedRowIndex].children[6].textContent = updatedReorderPoint;
+        productElements[selectedRowIndex].children[7].textContent = updatedSupplier;
+        productElements[selectedRowIndex].children[8].textContent = updatedDateReceived;
+        productElements[selectedRowIndex].children[9].textContent = updatedShelfLocation;
+        productElements[selectedRowIndex].children[10].textContent = updatedProductStatus;
+
+        // Update the XML string
+        xmlContent = new XMLSerializer().serializeToString(xmlDoc);
+
+        // Update the displayed table
+        tableproducts.rows[selectedRowIndex].cells[1].textContent = updatedProductName;
+        tableproducts.rows[selectedRowIndex].cells[2].textContent = updatedSKU;
+        tableproducts.rows[selectedRowIndex].cells[3].textContent = updatedManufacturer;
+        tableproducts.rows[selectedRowIndex].cells[4].textContent = updatedCategory;
+        tableproducts.rows[selectedRowIndex].cells[5].textContent = updatedUnitPrice;
+        tableproducts.rows[selectedRowIndex].cells[6].textContent = updatedQuantityInStock;
+        tableproducts.rows[selectedRowIndex].cells[7].textContent = updatedReorderPoint;
+        tableproducts.rows[selectedRowIndex].cells[8].textContent = updatedSupplier;
+        tableproducts.rows[selectedRowIndex].cells[9].textContent = updatedDateReceived;
+        tableproducts.rows[selectedRowIndex].cells[10].textContent = updatedShelfLocation;
+        tableproducts.rows[selectedRowIndex].cells[11].textContent = updatedProductStatus;
+
+        // Hide the update form
+        document.getElementById("editForm").style.display = "none";
+    }
+}
+
+
+        function deleteProduct(index) {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlContent, "application/xml");
+    const productElements = xmlDoc.querySelectorAll('product');
+    
+    if (index >= 0 && index < productElements.length) {
+        productElements[index].remove();
+
+        xmlContent = new XMLSerializer().serializeToString(xmlDoc);
+
+        tableproducts.deleteRow(index);
+
+        // Update Product IDs in the table after deletion
+        const rows = tableproducts.rows;
+        for (let i = index + 1; i < rows.length; i++) {
+            const currentProductIndex = i - 1;  // Adjust index for productElements
+            rows[i].cells[0].textContent = currentProductIndex + 1;
+
+            // Also update the onclick functions for Edit and Delete buttons
+            rows[i].cells[12].innerHTML = `
+                <button onclick="editProduct(${currentProductIndex + 1})">Edit</button>
+                <button onclick="deleteProduct(${currentProductIndex + 1})">Delete</button>
+            `;
+        }   
+    }
+}
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-4 offset-md-4">
+            <div class="card mt-5">
+                <div class="card-header">
+                    <h3>Login</h3>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="username">Username:</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password:</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <button type="button" class="btn btn-primary btn-block" id="save">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const submit = document.getElementById("save");
+    const username = document.getElementById("username");
+    const password = document.getElementById("password");
+
+    submit.addEventListener("click", function () {
+        fetch('login.xml')
+
+            .then((response) => response.text())
+            .then((xml) => {
+                
+                let parser = new DOMParser();
+                let xmlDOM = parser.parseFromString(xml, 'application/xml');
+                let login = xmlDOM.querySelectorAll('user');
+                console.log(login);
+                console.log(xmlDOM);
+                let isValid = checkUserPass(username.value,password.value);
+
+                if(isValid){
+                    sessionStorage.setItem("username", username.value);
+                    window.location.href = "../inventory.html";
+                }else{
+                   alert("Login Failed!!")
+                }
+                console.log(login);
+                console.log(login[0].children[0].textContent);
+                console.log(login[1].children[0].textContent);
+
+
+                function checkUserPass(username,password){
+                    let isValid = false;
+                    for(let i =0; i < login.length; i++){
+                        if(login[i].children[0].textContent == username && login[i].children[1].textContent == password){
+                            isValid = true;
+                            break;
+                        }
+                    }
+                    return isValid;
+                }
+            });
+    });
+</script>
+</body>
+</html>
